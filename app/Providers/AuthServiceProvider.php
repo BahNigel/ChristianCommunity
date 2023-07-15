@@ -25,36 +25,47 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // $this->registerPolicies();
+        $this->registerPolicies();
 
-        // $roles = [
-        //     'admin',
-        //     'user',
-        // ];
+        $roles = [
+            'admin',
+            'user',
+        ];
 
-        // foreach ($roles as $role) {
-        //     Role::create(['name' => $role]);
-        // }
+        foreach ($roles as $role) {
+            if (!Role::where('name', $role)->exists()) {
+                Role::create(['name' => $role]);
+            }
+        }
 
-        // $permissions = [
-        //     'create-post',
-        //     'edit-post',
-        //     'delete-post',
-        // ];
+        $permissions = [
+            'create-post',
+            'edit-post',
+            'delete-post',
+        ];
 
-        // foreach ($permissions as $permission) {
-        //     Permission::create(['name' => $permission]);
-        // }
+        foreach ($permissions as $permission) {
+            if (!Permission::where('name', $permission)->exists()) {
+                Permission::create(['name' => $permission]);
+            }
+        }
 
-        // Role::findByName('admin')->givePermissionTo(Permission::all());
-        // Role::findByName('user')->givePermissionTo('create-post');
+        $adminRole = Role::findByName('admin');
+        if ($adminRole) {
+            $adminRole->givePermissionTo(Permission::all());
+        }
 
-        // Gate::define('isAdmin', function ($user) {
-        //     return $user->hasRole('admin');
-        // });
+        $userRole = Role::findByName('user');
+        if ($userRole) {
+            $userRole->givePermissionTo('create-post');
+        }
 
-        // Gate::define('isUser', function ($user) {
-        //     return $user->hasRole('user');
-        // });
+        Gate::define('isAdmin', function ($user) {
+            return $user->hasRole('admin');
+        });
+
+        Gate::define('isUser', function ($user) {
+            return $user->hasRole('user');
+        });
     }
 }
